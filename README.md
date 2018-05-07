@@ -4,7 +4,7 @@ In group\_vars/all, assign values thusly:
 
 ```yaml
 domain: k8s.example.com
-repository\_host: repocache.example.com
+repository_host: repocache.example.com
 
 networks:
   aio:
@@ -36,9 +36,9 @@ networks:
 In host\_vars/aio.yml, assign values thusly:
 
 ```yaml
-network\_index: 0
+network_index: 0
 
-host\_networks:
+host_networks:
   - network: aio
     device: enp6s0
     bridged: False
