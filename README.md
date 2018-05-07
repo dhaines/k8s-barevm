@@ -1,3 +1,7 @@
+What this is:
+
+An attempt to simulate a baremetal Kubernetes cluster making use of the MetalLB and External-DNS addons.
+
 How to use:
 
 In group\_vars/all, assign values thusly:
