@@ -1,0 +1,6 @@
+---
+- import_tasks: repos.yml
+- import_tasks: network.yml
+- import_tasks: storage.yml
+- import_tasks: libvirt.yml
+- import_tasks: spawn-ns.yml

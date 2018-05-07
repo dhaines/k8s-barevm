@@ -1,0 +1,24 @@
+---
+- name: Install hypervisor requirements
+  yum:
+    name:
+      - libvirt
+      - qemu-kvm
+      - virt-install
+      - python-lxml
+      - libvirt-python
+    state: latest
+
+- name: Add hypervisor kernel parameters
+  command: grubby --update-kernel=ALL --args='consoleblank=0 intel_iommu=on'
+  when: ansible_cmdline.intel_iommu is not defined or
+        ansible_cmdline.intel_iommu != 'on'or
+        ansible_cmdline.consoleblank is not defined or
+        ansible_cmdline.consoleblank != '0'
+  notify: Reboot host
+
+- name: Start libvirt now and forever
+  systemd:
+    name: libvirtd
+    state: started
+    enabled: yes

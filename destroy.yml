@@ -1,0 +1,11 @@
+---
+- hosts: aio
+  gather_facts: no
+  remote_user: root
+  tasks:
+    - name: Wipe lab disk
+      command: wipefs -af /dev/sda
+    - name: Immediate reboot
+      shell: sleep 2 && echo 'b' > /proc/sysrq-trigger
+      async: 1
+      poll: 0

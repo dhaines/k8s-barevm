@@ -1,0 +1,36 @@
+---
+- name: Disable firewalld
+  systemd:
+    name: firewalld
+    state: stopped
+    enabled: no
+
+- name: Write Ethernet ifcfg files
+  template:
+    src: network-scripts/ifcfg-eth.j2
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item.device }}"
+  with_items: "{{ host_networks }}"
+  notify: Restart networking
+
+- name: Write bridge ifcfg files
+  template:
+    src: network-scripts/ifcfg-br.j2
+    dest: "/etc/sysconfig/network-scripts/ifcfg-br-{{ item.network }}"
+  with_items: "{{ host_networks }}"
+  when: item.bridged
+  notify: Restart networking
+
+- name: Disable NetworkManager
+  systemd:
+    state: stopped
+    name: NetworkManager
+    enabled: no
+
+- name: Enable Network scripts
+  systemd:
+    name: network
+    enabled: yes
+  notify: Restart networking
+
+- name: Force networking restart before we continue
+  meta: flush_handlers

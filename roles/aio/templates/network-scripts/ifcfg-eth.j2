@@ -1,0 +1,23 @@
+NM_CONTROLLED=no
+DEVICE={{ item.device }}
+TYPE=Ethernet
+MTU={{ networks[item.network]['mtu'] | default('1500') }}
+ONBOOT=yes
+BOOTPROTO=none
+{% if item.vlan is defined and item.vlan %}
+VLAN=yes
+{% endif %}
+{% if item.bridged %}
+BRIDGE=br-{{ item.network }}
+{% elif item.allocate_ip %}
+IPADDR={{ networks[item.network]['cidr'] | ipaddr(networks[item.network]['start_index'] + network_index) | ipaddr('address') }}
+NETMASK={{ networks[item.network]['cidr'] | ipaddr('netmask') }}
+{% if networks[item.network]['gateway'] is defined %}
+GATEWAY={{ networks[item.network]['gateway'] }}
+{#
+{% for item in [hostvars['ns1']['ansible_default_ipv4']['address'], hostvars['ns2']['ansible_default_ipv4']['address']] -%}
+DNS{{ loop.index }}={{ item }}
+{% endfor -%}
+#}
+{% endif %}
+{% endif %}

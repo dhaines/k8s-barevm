@@ -1,0 +1,14 @@
+---
+- name: Restart networking
+  systemd:
+    state: restarted
+    name: network
+
+- name: Reboot host
+  shell: sleep 2 && /sbin/reboot
+  async: 1
+  poll: 0
+  notify: Wait for reboot
+
+- name: Wait for reboot
+  local_action: wait_for host={{ ansible_default_ipv4.address }} port=22 state=started delay=60 timeout=300

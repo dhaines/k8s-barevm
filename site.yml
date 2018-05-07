@@ -1,0 +1,20 @@
+---
+- hosts: aio
+  tags:
+    - aio
+    - infra
+  tasks:
+    - import_role:
+        name: aio
+
+- hosts: ns
+  gather_facts: no
+  tags:
+    - ns
+    - infra
+  tasks:
+    - import_role:
+        name: vhost
+        tasks_from: configure.yml
+    - import_role:
+        name: ns

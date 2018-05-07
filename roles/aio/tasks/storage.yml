@@ -1,0 +1,61 @@
+---
+- name: Refresh facts
+  setup:
+
+- name: Resize root partition
+  lvol:
+    vg: vg0
+    lv: root
+    size: 4g
+
+- name: Resize root filesystem
+  filesystem:
+    dev: /dev/mapper/vg0-root
+    fstype: ext4
+    resizefs: yes
+
+- name: Create swap LV
+  lvol:
+    vg: vg0
+    lv: swap
+    size: "{{ ansible_memtotal_mb }}m"
+    force: yes
+  register: swap_partition 
+
+- name: Create swap filesystem
+  command: mkswap -L swap /dev/mapper/vg0-swap
+  when: swap_partition.changed
+
+- name: Add swap to fstab
+  lineinfile:                                                          
+    path: /etc/fstab
+    line: /dev/mapper/vg0-swap none swap defaults 0 0                  
+
+- name: Activate swap partitions 
+  command: swapon -a
+  when: swap_partition.changed
+
+- name: Refresh facts
+  setup:
+
+- name: Create libvirt LV
+  lvol:
+    vg: vg0
+    lv: libvirt
+    size: '{{ ansible_lvm.vgs.vg0.free_g | int }}g'
+  when: ansible_lvm.vgs.vg0.free_g | int > 0
+
+- name: Create libvirt filesystem
+  filesystem:
+    dev: /dev/mapper/vg0-libvirt
+    fstype: ext4
+    resizefs: yes
+
+- name: Mount libvirt
+  mount:
+    path: /var/lib/libvirt
+    src: /dev/mapper/vg0-libvirt
+    state: mounted
+    fstype: ext4
+    dump: 1
+    passno: 2

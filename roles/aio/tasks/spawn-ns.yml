@@ -1,0 +1,32 @@
+---
+- name: Spawn ns
+  command: virt-install
+    -n ns.{{ domain }}
+    --location http://{{ repository_host }}/centos/7/os/x86_64/
+    --network bridge=br-node
+    --extra-args ip={{ networks.node.cidr | ipaddr(networks.node.start_index + network_index) | ipaddr('address') }}::{{ networks.node.gateway | ipaddr('address') }}:{{ networks.node.cidr | ipaddr('netmask') }}:ns.{{ domain }}:eth0:none:1500
+    --extra-args bootdev=eth0
+    --extra-args ksdevice=bootif
+    --extra-args nameserver={{ ansible_dns.nameservers[0] }}
+    --extra-args nameserver={{ ansible_dns.nameservers[1] }}
+    --extra-args rd.neednet=1
+    --extra-args ks=http://{{ repository_host }}/bootstrap/virtual.ks
+    --serial pty
+    --nographics
+    --extra-args console=tty0
+    --extra-args console=ttyS0,115200
+    --ram=2048
+    --vcpus=1
+    --disk size=16
+    --cpu host-passthrough
+    --os-type=linux
+    --os-variant=centos7.0
+    --noautoconsole
+    --wait -1
+  ignore_errors: yes
+
+- name: Add ns to inventory
+  add_host:
+    name: ns
+    ansible_host: "{{ networks.node.cidr | ipaddr(networks.node.start_index + network_index) | ipaddr('address') }}"
+    ansible_user: root

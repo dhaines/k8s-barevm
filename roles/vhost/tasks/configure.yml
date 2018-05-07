@@ -1,0 +1,25 @@
+---
+- wait_for_connection:
+ 
+- setup:
+
+- name: Create swap LV
+  lvol:
+    vg: vg0
+    lv: swap
+    size: "{{ ansible_memtotal_mb }}m"
+    force: yes
+  register: swap_partition
+
+- name: Create swap filesystem
+  command: mkswap -L swap /dev/mapper/vg0-swap
+  when: swap_partition.changed
+
+- name: Add swap to fstab
+  lineinfile:
+    path: /etc/fstab
+    line: /dev/mapper/vg0-swap none swap defaults 0 0
+
+- name: Activate swap partitions
+  command: swapon -a
+  when: swap_partition.changed

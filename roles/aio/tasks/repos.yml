@@ -1,0 +1,52 @@
+---
+- name: Clean CentOS repository metadata
+  command: yum clean all
+  args:
+    warn: no
+
+- name: Install EPEL Release
+  yum:
+    name: epel-release
+    state: latest
+
+- name: Find configured repositories
+  find:
+    paths: /etc/yum.repos.d
+    patterns: "*.repo"
+  register: repo_files
+
+- name: Remove mirrorlists
+  lineinfile:
+    regexp: '^mirrorlist=.*'
+    state: absent
+    backup: yes
+    path: '{{ item.path }}'
+  with_items: '{{ repo_files.files }}'
+
+- name: Replace mirror.centos.org
+  replace:
+    regexp: 'mirror\.centos\.org'
+    replace: '{{ repository_host }}'
+    backup: yes
+    path: '{{ item.path }}'
+  with_items: '{{ repo_files.files }}'
+
+- name: Replace download.fedoraproject.org/pub
+  replace:
+    regexp: 'download\.fedoraproject\.org/pub'
+    replace: '{{ repository_host }}'
+    backup: yes
+    path: '{{ item.path }}'
+  with_items: '{{ repo_files.files }}'
+
+- name: Uncomment EPEL main repo
+  replace:
+    regexp: '^#(baseurl=.*basearch)$'
+    replace: '\1'
+    backup: yes
+    path: /etc/yum.repos.d/epel.repo
+
+- name: Update CentOS repository metadata
+  command: yum makecache
+  args:
+    warn: no

@@ -1,0 +1,28 @@
+---
+- name: Spawn VM
+  command: virt-install
+    -n {{ hostname }}
+    --location http://{{ repository_host }}/centos/7/os/x86_64/
+    --network bridge=br-node
+    --extra-args bootdev=eth0
+    --extra-args ksdevice=bootif
+    --extra-args rd.neednet=1
+    --extra-args ks=http://{{ repository_host }}/bootstrap/virtual.ks
+    --serial pty
+    --nographics
+    --extra-args console=tty0
+    --extra-args console=ttyS0,115200
+    --ram={{ ram }}
+    --vcpus={{ cpus }}
+    --disk size={{ disk_size }}
+    --cpu host-passthrough
+    --os-type=linux
+    --os-variant=centos7.0
+    --noautoconsole
+    --wait -1
+  ignore_errors: yes
+
+- name: Add VM to inventory
+  add_host:
+    name: "{{ hostname }}"
+    ansible_user: root
