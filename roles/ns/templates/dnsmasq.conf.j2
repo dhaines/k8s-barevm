@@ -1,0 +1,12 @@
+{% set cidr_host = (ansible_default_ipv4.address + "/" + ansible_default_ipv4.netmask) | ipaddr('cidr') %}
+{% set cidr_net = cidr_host | ipaddr('subnet') %}
+{% set cidr_range_start = cidr_net | ipaddr(((cidr_host | ipaddr('address') | ipaddr('int')) - (cidr_net | ipaddr('network') | ipaddr('int'))) * 2) %}
+{% set cidr_range_end = cidr_net | ipaddr('-2') %}
+auth-server=ns.{{ domain }},{{ ansible_default_ipv4.interface }}
+auth-zone={{ domain }},{{ cidr_net }}
+domain={{ domain }}
+dhcp-option=option:router,{{ ansible_default_ipv4.gateway }}
+dhcp-option=option:dns-server,{{ ansible_default_ipv4.address }}
+dhcp-range={{ cidr_range_start | ipaddr('address') }},{{ cidr_range_end | ipaddr('address') }},1m
+
+host-record=ns.{{ domain }},{{ ansible_default_ipv4.address }}

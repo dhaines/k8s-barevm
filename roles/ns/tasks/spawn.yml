@@ -4,7 +4,9 @@
     -n ns.{{ domain }}
     --location http://{{ repository_host }}/centos/7/os/x86_64/
     --network bridge=br-node
+    --network bridge=br-node
     --extra-args ip={{ networks.node.cidr | ipaddr(networks.node.start_index + network_index) | ipaddr('address') }}::{{ networks.node.gateway | ipaddr('address') }}:{{ networks.node.cidr | ipaddr('netmask') }}:ns.{{ domain }}:eth0:none:1500
+    --extra-args ip={{ networks.node.cidr | ipaddr(networks.node.start_index + network_index + 1) | ipaddr('address') }}::{{ networks.node.gateway | ipaddr('address') }}:{{ networks.node.cidr | ipaddr('netmask') }}::eth1:none:1500
     --extra-args bootdev=eth0
     --extra-args ksdevice=bootif
     --extra-args nameserver={{ ansible_dns.nameservers[0] }}

@@ -7,6 +7,16 @@
     - import_role:
         name: aio
 
+- hosts: aio
+  gather_facts: no
+  tags:
+    - ns
+    - infra
+  tasks:
+    - import_role:
+        name: ns
+        tasks_from: spawn.yml
+
 - hosts: ns
   gather_facts: no
   tags:
