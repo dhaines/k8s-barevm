@@ -1,0 +1,26 @@
+---
+
+- wait_for_connection:
+
+- setup:
+
+- name: Set hostname statically
+  hostname:
+    name: ns.{{ domain }}
+
+- name: Install dnsmasq
+  package:
+    name: dnsmasq
+    state: latest
+
+- name: Configure dnsmasq
+  template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.d/k8s-libvirt.conf
+  notify: Restart dnsmasq
+
+- name: Start dnsmasq now and forever
+  service:
+    name: dnsmasq
+    state: started
+    enabled: yes

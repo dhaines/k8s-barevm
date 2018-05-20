@@ -1,21 +1,7 @@
 ---
-- name: Set hostname statically
-  hostname:
-    name: ns.{{ domain }}
-
-- name: Install dnsmasq
-  package:
-    name: dnsmasq
-    state: latest
-
-- name: Configure dnsmasq
-  template:
-    src: dnsmasq.conf.j2
-    dest: /etc/dnsmasq.d/k8s-libvirt.conf
-  notify: Restart dnsmasq
-
-- name: Start dnsmasq now and forever
-  service:
-    name: dnsmasq
-    state: started
-    enabled: yes
+- import_tasks: spawn.yml
+- import_tasks: configure.yml
+  delegate_to: "{{ ns_ip }}"
+- import_tasks: networking.yml
+  delegate_to: "{{ ns_ip }}"
+  remote_user: root
