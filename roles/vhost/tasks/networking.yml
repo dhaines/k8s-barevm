@@ -1,0 +1,29 @@
+---
+
+- name: Write Ethernet ifcfg files
+  template:
+    src: ifcfg-eth.j2
+    dest: "/etc/sysconfig/network-scripts/ifcfg-{{ item }}"
+  with_items: "{{ ansible_interfaces | select('match', '^eth[0-9]+$') | list }}"
+  notify: Restart networking
+
+- name: Set default interface
+  lineinfile:
+    path: /etc/sysconfig/network
+    line: GATEWAYDEV=eth0
+  notify: Restart networking
+
+- name: Disable NetworkManager
+  systemd:
+    state: stopped
+    name: NetworkManager
+    enabled: no
+
+- name: Enable Network scripts
+  systemd:
+    name: network
+    enabled: yes
+  notify: Restart networking
+
+- name: Force networking restart before we continue
+  meta: flush_handlers

@@ -1,13 +1,14 @@
 ---
 - name: Spawn VM
   command: virt-install
-    -n {{ hostname }}
-    --location http://{{ repository_host }}/centos/7/os/x86_64/
+    --name {{ inventory_hostname }}
+    --location {{ centos_url }}
     --network bridge=br-node
-    --extra-args bootdev=eth0
-    --extra-args ksdevice=bootif
-    --extra-args rd.neednet=1
-    --extra-args ks=http://{{ repository_host }}/bootstrap/virtual.ks
+    --network bridge=br-nfs
+    --network bridge=br-iscsia
+    --network bridge=br-iscsib
+    --extra-args ip=::::{{ inventory_hostname }}:eth0:dhcp
+    --extra-args ks={{ centos_vhost_ks }}
     --serial pty
     --nographics
     --extra-args console=tty0
@@ -21,8 +22,8 @@
     --noautoconsole
     --wait -1
   ignore_errors: yes
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
 
-- name: Add VM to inventory
-  add_host:
-    name: "{{ hostname }}"
-    ansible_user: root
+- wait_for_connection:
+
+- setup:

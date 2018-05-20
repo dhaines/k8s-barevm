@@ -1,0 +1,1 @@
+from {{ networks[item.network]['cidr'] | ipaddr(networks[item.network]['start_index'] + network_index) | ipaddr('address') }} table {{ item.network }}
