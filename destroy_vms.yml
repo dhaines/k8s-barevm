@@ -1,0 +1,17 @@
+---
+
+- hosts: ns:pdns:master:node
+  gather_facts: no
+  tasks:
+    - command: virsh destroy {{ inventory_hostname }}
+      delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+      ignore_errors: true
+
+    - command : virsh undefine {{ inventory_hostname }}
+      delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+      ignore_errors: true
+
+    - command: virsh vol-delete {{ inventory_hostname }}.qcow2 --pool default
+      delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+      ignore_errors: true
+
