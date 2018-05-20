@@ -1,0 +1,27 @@
+---
+- name: Install NFS utilities
+  package:
+    name: nfs-utils
+    state: latest
+
+- name: Install iSCSI utilties
+  package:
+    name:
+      - lsscsi
+      - iscsi-initiator-utils
+      - sg3_utils
+      - device-mapper-multipath
+    state: latest
+
+- name: Enable multipathing
+  command: mpathconf --enable --with_multipathd y
+
+- name: Start iSCSI daemons now and forever
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - iscsid
+    - multipathd
+    - iscsi
