@@ -1,28 +1,80 @@
 ---
+
+- name: Install necessary packages
+  package:
+    name: genisoimage
+    state: latest
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  run_once: True
+
+- name: Check for existing cloud-init ISO
+  stat:
+    path: /var/lib/libvirt/images/{{ inventory_hostname }}-init.iso
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  register: old_iso
+
+- name: Create cloud-init ISO root
+  tempfile:
+    state: directory
+  register: iso_root
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  become: yes
+  become_user: qemu
+  when: not old_iso.stat.exists
+
+- name: Create meta-data
+  template:
+    src: meta-data.j2
+    dest: "{{ iso_root.path }}/meta-data"
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  become: yes
+  become_user: qemu
+  when: not old_iso.stat.exists
+
+- name: Create user-data
+  template:
+    src: user-data.j2
+    dest: "{{ iso_root.path }}/user-data"
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  become: yes
+  become_user: qemu
+  when: not old_iso.stat.exists
+
+- name: Create cloud-init ISO image
+  command: genisoimage -output /var/lib/libvirt/images/{{ inventory_hostname }}-init.iso -volid cidata -joliet -rock {{ iso_root.path }}/meta-data {{ iso_root.path }}/user-data
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  become: yes
+  become_user: qemu
+  when: not old_iso.stat.exists
+
+- name: Clean up
+  file:
+    path: "{{ iso_root.path | default('') }}"
+    state: absent
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+  when: iso_root is defined
+
 - name: Spawn VM
   command: virt-install
-    -n {{ hostname }}
-    --location http://{{ repository_host }}/centos/7/os/x86_64/
-    --network bridge=br-node
-    --extra-args bootdev=eth0
-    --extra-args ksdevice=bootif
-    --extra-args rd.neednet=1
-    --extra-args ks=http://{{ repository_host }}/bootstrap/virtual.ks
-    --serial pty
-    --nographics
-    --extra-args console=tty0
-    --extra-args console=ttyS0,115200
+    --name {{ inventory_hostname }}
     --ram={{ ram }}
     --vcpus={{ cpus }}
-    --disk size={{ disk_size }}
-    --cpu host-passthrough
+    --disk backing_store=/var/lib/libvirt/images/Fedora-AtomicHost-28-1.1.x86_64.qcow2,backing_format=qcow2,path=/var/lib/libvirt/images/{{ inventory_hostname }}.qcow2,size={{ disk_size }}
+    --disk path=/var/lib/libvirt/images/{{ inventory_hostname }}-init.iso,device=cdrom,bus=virtio
+    --boot hd,cdrom
     --os-type=linux
-    --os-variant=centos7.0
+    --os-variant=fedora27
+    --network bridge=br-node
+    --network bridge=br-nfs
+    --network bridge=br-iscsia
+    --network bridge=br-iscsib
+    --nographics
+    --serial pty
+    --cpu host-passthrough
     --noautoconsole
-    --wait -1
   ignore_errors: yes
+  delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
 
-- name: Add VM to inventory
-  add_host:
-    name: "{{ hostname }}"
-    ansible_user: root
+- wait_for_connection:
+
+- setup:

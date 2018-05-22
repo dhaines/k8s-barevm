@@ -1,0 +1,16 @@
+#cloud-config
+password: {{ atomic_host_password }}
+ssh_pwauth: False
+chpasswd:
+  expire: False
+
+ssh_authorized_keys:
+
+runcmd:
+  - atomic host upgrade
+  - rpm-ostree install socat
+
+power_state:
+  delay: now
+  mode: reboot
+  condition: True

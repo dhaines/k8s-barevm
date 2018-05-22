@@ -22,3 +22,22 @@
     name: libvirtd
     state: started
     enabled: yes
+
+- name: Download CentOS Atomic Host image
+  get_url:
+    url: "{{ centos_atomic_image_url }}"
+    dest: /var/lib/libvirt/images
+    owner: qemu
+    group: qemu
+    mode: 0600
+    setype: svirt_image_t
+  ignore_error: yes
+
+- name: Download Fedora Atomic Host image
+  get_url:
+    url: "{{ fedora_atomic_image_url }}"
+    dest: /var/lib/libvirt/images
+    owner: qemu
+    group: qemu
+    mode: 0600
+    setype: svirt_image_t
