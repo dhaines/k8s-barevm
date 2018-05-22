@@ -8,7 +8,7 @@ ssh_authorized_keys:
 
 runcmd:
   - atomic host upgrade
-  - rpm-ostree install socat
+  - rpm-ostree install socat nfs-utils lsscsi iscsi-initiator-utils sg3_utils device-mapper-multipath
 
 power_state:
   delay: now

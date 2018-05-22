@@ -65,5 +65,3 @@
   tasks:
     - import_role:
         name: vhost
-    - import_role:
-        name: node
