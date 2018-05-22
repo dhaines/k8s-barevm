@@ -5,14 +5,12 @@
     --location {{ centos_url }}
     --network bridge=br-node
     --extra-args ip={{ ns_ip }}::{{ networks.node.gateway | ipaddr('address') }}:{{ networks.node.cidr | ipaddr('netmask') }}:{{ inventory_hostname }}:eth0:none:1500
-    --network bridge=br-node
-    --extra-args ip={{ dnsmasq_ip }}::{{ networks.node.gateway | ipaddr('address') }}:{{ networks.node.cidr | ipaddr('netmask') }}::eth1:none:1500
     --network bridge=br-nfs
-    --extra-args ip={{ networks.nfs.cidr | ipaddr(networks.nfs.start_index) | ipaddr('address') }}::{{ networks.nfs.gateway | default('') | ipaddr('address') | default('', True) }}:{{ networks.nfs.cidr | ipaddr('netmask') | default('') }}::eth2:none:{{ networks.nfs.mtu | default('1500') }}
+    --extra-args ip={{ networks.nfs.cidr | ipaddr(networks.nfs.start_index) | ipaddr('address') }}::{{ networks.nfs.gateway | default('') | ipaddr('address') | default('', True) }}:{{ networks.nfs.cidr | ipaddr('netmask') | default('') }}::eth1:none:{{ networks.nfs.mtu | default('1500') }}
     --network bridge=br-iscsia
-    --extra-args ip={{ networks.iscsia.cidr | ipaddr(networks.iscsia.start_index) | ipaddr('address') }}::{{ networks.iscsia.gateway | default('') | ipaddr('address') | default('', True) }}:{{ networks.iscsia.cidr | ipaddr('netmask') }}::eth3:none:{{ networks.iscsia.mtu | default('1500') }}
+    --extra-args ip={{ networks.iscsia.cidr | ipaddr(networks.iscsia.start_index) | ipaddr('address') }}::{{ networks.iscsia.gateway | default('') | ipaddr('address') | default('', True) }}:{{ networks.iscsia.cidr | ipaddr('netmask') }}::eth2:none:{{ networks.iscsia.mtu | default('1500') }}
     --network bridge=br-iscsib
-    --extra-args ip={{ networks.iscsib.cidr | ipaddr(networks.iscsib.start_index) | ipaddr('address') }}::{{ networks.iscsib.gateway | default('') | ipaddr('address') | default('', True) }}:{{ networks.iscsib.cidr | ipaddr('netmask') }}::eth4:none:{{ networks.iscsib.mtu | default('1500') }}
+    --extra-args ip={{ networks.iscsib.cidr | ipaddr(networks.iscsib.start_index) | ipaddr('address') }}::{{ networks.iscsib.gateway | default('') | ipaddr('address') | default('', True) }}:{{ networks.iscsib.cidr | ipaddr('netmask') }}::eth3:none:{{ networks.iscsib.mtu | default('1500') }}
     --extra-args bootdev=eth0
     --extra-args ksdevice=bootif
     --extra-args nameserver={{ hostvars[groups['aio'][0]]['ansible_dns']['nameservers'][0] }}

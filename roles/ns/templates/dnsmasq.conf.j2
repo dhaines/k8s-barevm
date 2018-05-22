@@ -6,8 +6,6 @@ auth-ttl=10
 
 dhcp-authoritative
 
-no-dhcp-interface=eth0
-
 dhcp-option=option:dns-server,{{ ansible_eth1.ipv4.address }}
 
 dhcp-range=node,{{ networks.node.cidr | ipaddr(networks.node.start_index + 4) | ipaddr('address') }},{{ networks.node.cidr | ipaddr(networks.node.start_index + 63) | ipaddr('address') }},1h

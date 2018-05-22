@@ -1,40 +1,21 @@
 ---
 
-- name: Write Ethernet route files
-  template:
-    src: route.j2
-    dest: "/etc/sysconfig/network-scripts/route-{{ item.interface }}"
+- name: Copy virtual IP config file
+  copy:
+    src: /etc/sysconfig/network-scripts/ifcfg-eth0
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth0:0
+    remote_src: True
+
+- name: Rewrite virtual IP config file
+  replace:
+    path: /etc/sysconfig/network-scripts/ifcfg-eth0:0
+    regexp: "{{ item.regexp }}"
+    replace: "{{ item.replace }}"
   with_items:
-    - interface: eth0
-      network: aio
-    - interface: eth1
-      network: aio
-  notify: Restart networking
-
-- name: Write Ethernet rule files
-  template:
-    src: rule.j2
-    dest: "/etc/sysconfig/network-scripts/rule-{{ item.interface }}"
-  with_items:
-    - interface: eth0
-      address: "{{ ns_ip }}"
-    - interface: eth1
-      address: "{{ dnsmasq_ip }}"
-  notify: Restart networking
-
-- name: Create routing table
-  blockinfile:
-    block: |
-      16 ns
-      32 dnsmasq
-    path: /etc/iproute2/rt_tables
-  notify: Restart networking
-
-# Pardon the ugliness; it was either this bit or lots of bits throughout.
-- name: Set default interface
-  lineinfile:
-    path: /etc/sysconfig/network
-    line: GATEWAYDEV=eth0
+    - regexp: eth0
+      replace: eth0:0
+    - regexp: "{{ ns_ip | regex_escape() }}"
+      replace: "{{ dnsmasq_ip }}"
   notify: Restart networking
 
 - name: Disable NetworkManager
