@@ -8,7 +8,6 @@ In group\_vars/all, assign values thusly:
 
 ```yaml
 domain: k8s.example.com
-repository_host: repocache.example.com
 
 networks:
   aio:
@@ -34,8 +33,6 @@ networks:
 ```
 
 'start\_index' is to account for existing infrastructure
-
-'repository\_host' is an HTTP-accessible host with kickstarts available in /bootstrap and CentOS, Fedora, and EPEL mirrors available at /centos /fedora and /epel, accordingly (look at Trebuchet to see an Nginx-based caching proxy for mirrors.mit.edu that fits this spec.).
 
 In host\_vars/aio.yml, assign values thusly:
 
