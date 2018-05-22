@@ -15,3 +15,7 @@
       delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
       ignore_errors: true
 
+    - command: virsh vol-delete {{ inventory_hostname }}-init.iso --pool default
+      delegate_to: "{{ hostvars[groups['aio'][0]]['inventory_hostname'] }}"
+      ignore_errors: true
+
