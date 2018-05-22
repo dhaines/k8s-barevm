@@ -7,24 +7,63 @@
     - import_role:
         name: aio
 
-- hosts: aio
-  gather_facts: no
-  tags:
-    - ns
-    - infra
-  tasks:
-    - import_role:
-        name: ns
-        tasks_from: spawn.yml
-
 - hosts: ns
   gather_facts: no
   tags:
     - ns
     - infra
+    - vm
   tasks:
+    - import_role:
+        name: ns
     - import_role:
         name: vhost
         tasks_from: configure.yml
+#
+#- hosts: pdns
+#  gather_facts: no
+#  tags:
+#    - ns
+#    - infra
+#    - vm
+#  tasks:
+#    - import_role:
+#        name: pdns
+#    - import_role:
+#        name: vhost
+#        tasks_from: configure.yml
+#    - import_role:
+#        name: PowerDNS.pdns
+#      vars:
+#        database_name: '/var/lib/powerdns/db.sqlite'
+#        pdns_config:
+#          master: true
+#        pdns_backends:
+#          gsqlite3:
+#            database: "{{ database_name }}"
+#            dnssec: yes
+#        pdns_sqlite_databases_locations:
+#          - "{{ database_name }}"
+#        pdns_install_repo: "{{ pdns_auth_powerdns_repo_41 }}"
+#
+- hosts: master
+  gather_facts: no
+  tags:
+    - master
+    - cluster
+    - vm
+  tasks:
     - import_role:
-        name: ns
+        name: vhost
+
+- hosts: node
+  gather_facts: no
+  tags:
+    - node
+    - cluster
+    - vm
+  tasks:
+    - import_role:
+        name: vhost
+    - import_role:
+        name: node
